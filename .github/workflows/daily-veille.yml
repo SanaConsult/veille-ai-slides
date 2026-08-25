@@ -43,6 +43,10 @@ jobs:
         if: steps.check.outputs.should_run == 'true'
         run: pip install anthropic feedparser requests pynacl
 
+      - name: Install ffmpeg
+        if: steps.check.outputs.should_run == 'true'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Set up Node
         if: steps.check.outputs.should_run == 'true'
         uses: actions/setup-node@v4
@@ -71,21 +75,47 @@ jobs:
         if: steps.check.outputs.should_run == 'true'
         run: node scripts/render_slides.js "slides/${{ steps.check.outputs.date }}"
 
-      - name: Commit and push slides
+      - name: Build Reel video (slides + royalty-free music)
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          python3 scripts/build_reel.py "slides/${{ steps.check.outputs.date }}" assets/music "slides/${{ steps.check.outputs.date }}/reel.mp4"
+
+      - name: Commit and push slides + Reel
         if: steps.check.outputs.should_run == 'true'
         run: |
           git config user.name "veille-ai-bot"
           git config user.email "actions@github.com"
-          git add "slides/${{ steps.check.outputs.date }}"/*.png
-          git commit -m "Slides ${{ steps.check.outputs.date }}" || echo "Nothing to commit"
+          git add "slides/${{ steps.check.outputs.date }}"/*.png "slides/${{ steps.check.outputs.date }}/reel.mp4"
+          git commit -m "Slides + Reel ${{ steps.check.outputs.date }}" || echo "Nothing to commit"
           git push
+
+      - name: Refresh Instagram token (once, shared by both publishes)
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 scripts/refresh_ig_token.py
 
       - name: Publish carousel to Instagram
         if: steps.check.outputs.should_run == 'true'
         env:
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_ACCESS_TOKEN_FRESH: ${{ env.IG_ACCESS_TOKEN_FRESH }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
-          GH_SECRETS_PAT: ${{ secrets.GH_SECRETS_PAT }}
           SLIDE_DATE: ${{ steps.check.outputs.date }}
           CONTENT_JSON_PATH: content.json
-        run: python3 scripts/publish_instagram.py
+        run: python3 scripts/publish_carousel.py
+
+      - name: Publish Reel to Instagram
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          IG_ACCESS_TOKEN_FRESH: ${{ env.IG_ACCESS_TOKEN_FRESH }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          SLIDE_DATE: ${{ steps.check.outputs.date }}
+          CONTENT_JSON_PATH: content.json
+        run: python3 scripts/publish_reel.py
+
+      - name: Persist refreshed token to repo secret
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          IG_ACCESS_TOKEN_FRESH: ${{ env.IG_ACCESS_TOKEN_FRESH }}
+          GH_SECRETS_PAT: ${{ secrets.GH_SECRETS_PAT }}
+        run: python3 scripts/persist_token.py
