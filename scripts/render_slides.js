@@ -11,7 +11,10 @@ const path = require('path');
     console.error('No HTML files found in', dir);
     process.exit(1);
   }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' , args: ['--force-color-profile=srgb']});
+  // PLAYWRIGHT_CHROMIUM_PATH lets a specific sandbox pin an exact Chromium binary;
+  // when unset (e.g. in GitHub Actions after `npx playwright install chromium`),
+  // Playwright resolves its own bundled Chromium automatically.
+  const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined, args: ['--force-color-profile=srgb']});
   const page = await browser.newPage({ viewport: { width: 1080, height: 1080 }, deviceScaleFactor: 1 });
   for (const f of files) {
     const filePath = path.resolve(dir, f);
