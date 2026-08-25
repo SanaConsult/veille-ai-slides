@@ -1,0 +1,91 @@
+name: Veille AI quotidienne Instagram
+
+on:
+  schedule:
+    # Two entries cover both DST offsets for America/Toronto (UTC-4 in summer,
+    # UTC-5 in winter). The "Check local time" step below only lets the run
+    # continue when it's actually ~7:00 in Toronto, so exactly one of these
+    # two firings does real work each day — no manual DST adjustment needed.
+    - cron: '0 11 * * *'
+    - cron: '0 12 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check local time (America/Toronto)
+        id: check
+        run: |
+          python3 - <<'PY'
+          import datetime, zoneinfo, os
+          tz = zoneinfo.ZoneInfo("America/Toronto")
+          now = datetime.datetime.now(tz)
+          should_run = now.hour == 7 or "${{ github.event_name }}" == "workflow_dispatch"
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"should_run={'true' if should_run else 'false'}\n")
+              f.write(f"date={now.strftime('%Y-%m-%d')}\n")
+          print(f"Local Toronto time: {now}, should_run={should_run}")
+          PY
+
+      - name: Set up Python
+        if: steps.check.outputs.should_run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        if: steps.check.outputs.should_run == 'true'
+        run: pip install anthropic feedparser requests pynacl
+
+      - name: Set up Node
+        if: steps.check.outputs.should_run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright + Chromium
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Research and write today's news (Claude API)
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 scripts/fetch_news.py --out content.json
+
+      - name: Build slide HTML
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          mkdir -p "slides/${{ steps.check.outputs.date }}"
+          python3 scripts/build_slides.py content.json "slides/${{ steps.check.outputs.date }}"
+
+      - name: Render slides to PNG
+        if: steps.check.outputs.should_run == 'true'
+        run: node scripts/render_slides.js "slides/${{ steps.check.outputs.date }}"
+
+      - name: Commit and push slides
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          git config user.name "veille-ai-bot"
+          git config user.email "actions@github.com"
+          git add "slides/${{ steps.check.outputs.date }}"/*.png
+          git commit -m "Slides ${{ steps.check.outputs.date }}" || echo "Nothing to commit"
+          git push
+
+      - name: Publish carousel to Instagram
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          GH_SECRETS_PAT: ${{ secrets.GH_SECRETS_PAT }}
+          SLIDE_DATE: ${{ steps.check.outputs.date }}
+          CONTENT_JSON_PATH: content.json
+        run: python3 scripts/publish_instagram.py
