@@ -8,7 +8,13 @@ on:
     # two firings does real work each day — no manual DST adjustment needed.
     - cron: '0 11 * * *'
     - cron: '0 12 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      skip_carousel:
+        description: 'Skip carousel publish (useful for testing the Reel step alone)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -96,7 +102,7 @@ jobs:
         run: python3 scripts/refresh_ig_token.py
 
       - name: Publish carousel to Instagram
-        if: steps.check.outputs.should_run == 'true'
+        if: steps.check.outputs.should_run == 'true' && github.event.inputs.skip_carousel != 'true'
         env:
           IG_ACCESS_TOKEN_FRESH: ${{ env.IG_ACCESS_TOKEN_FRESH }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
