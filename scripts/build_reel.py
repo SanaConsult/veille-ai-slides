@@ -88,6 +88,7 @@ def main():
         "-c:a", "aac",
         "-b:a", "128k",
         "-shortest",
+        "-movflags", "+faststart",
         out_path,
     ]
 
