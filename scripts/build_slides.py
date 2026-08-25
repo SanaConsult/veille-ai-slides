@@ -34,8 +34,6 @@ def b64(path):
 
 LOGO_B64 = b64(os.path.join(ASSETS, "logo.png"))
 PLAYFAIR_B64 = b64(os.path.join(ASSETS, "PlayfairDisplay.ttf"))
-PLAYFAIR_ITALIC_B64 = b64(os.path.join(ASSETS, "PlayfairDisplayItalic.ttf"))
-INTER_B64 = b64(os.path.join(ASSETS, "Inter.ttf"))
 NAVY = "#07162D"
 NAVY_DEEP = "#050F1F"
 GOLD = "#C9A961"
@@ -49,22 +47,11 @@ BASE_CSS = f"""
   src: url(data:font/ttf;base64,{PLAYFAIR_B64}) format('truetype');
   font-weight: 100 900;
 }}
-@font-face {{
-  font-family: 'Playfair Display';
-  font-style: italic;
-  src: url(data:font/ttf;base64,{PLAYFAIR_ITALIC_B64}) format('truetype');
-  font-weight: 100 900;
-}}
-@font-face {{
-  font-family: 'Inter';
-  src: url(data:font/ttf;base64,{INTER_B64}) format('truetype');
-  font-weight: 100 900;
-}}
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
 html, body {{
   width: 1080px; height: 1080px;
   background: linear-gradient(160deg, {NAVY} 0%, {NAVY_DEEP} 100%);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Liberation Sans', 'Helvetica Neue', Arial, sans-serif;
   overflow: hidden;
 }}
 .canvas {{
@@ -81,7 +68,7 @@ html, body {{
   top: 84px; left: 90px;
 }}
 .eyebrow {{
-  font-family: 'Inter', sans-serif;
+  font-family: 'Liberation Sans', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 600;
   font-size: 20px;
   letter-spacing: 6px;
@@ -105,7 +92,7 @@ html, body {{
   color: {WHITE};
 }}
 .footer-lockup .wordmark {{
-  font-family: 'Inter', sans-serif;
+  font-family: 'Liberation Sans', 'Helvetica Neue', Arial, sans-serif;
   font-size: 15px;
   letter-spacing: 3px;
   color: {MUTED};
@@ -182,13 +169,13 @@ def slide_title(date_fr):
     .title-wrap { position: absolute; left: 90px; top: 360px; width: 780px; }
     .title-wrap h1 { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 104px; line-height: 1.02; color: #FFFFFF; }
     .title-wrap h1 em { font-style: italic; color: #C9A961; }
-    .subtitle { margin-top: 26px; font-family: 'Inter', sans-serif; font-size: 24px; color: #9FB0C3; font-weight: 400; letter-spacing: 0.3px; }
-    .date-tag { margin-top: 40px; display: inline-block; font-family: 'Inter', sans-serif; font-size: 17px; letter-spacing: 3px; color: #C9A961; text-transform: uppercase; border: 1px solid rgba(201,169,97,0.5); padding: 10px 20px; }
+    .subtitle { margin-top: 26px; font-family: 'Liberation Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 24px; color: #9FB0C3; font-weight: 400; letter-spacing: 0.3px; }
+    .date-tag { margin-top: 40px; display: inline-block; font-family: 'Liberation Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 17px; letter-spacing: 3px; color: #C9A961; text-transform: uppercase; border: 1px solid rgba(201,169,97,0.5); padding: 10px 20px; }
     .logo-full { position: absolute; left: 90px; bottom: 84px; display: flex; align-items: center; gap: 22px; }
     .logo-full img { width: 60px; height: 60px; object-fit: contain; }
-    .logo-full .lockup-text { font-family: 'Inter', sans-serif; }
+    .logo-full .lockup-text { font-family: 'Liberation Sans', 'Helvetica Neue', Arial, sans-serif; }
     .logo-full .lockup-text .b1 { font-size: 15px; letter-spacing: 4px; color: #9FB0C3; }
-    .swipe { position: absolute; right: 90px; bottom: 90px; font-family:'Inter',sans-serif; font-size:16px; letter-spacing:2px; color:#C9A961; text-transform:uppercase; }
+    .swipe { position: absolute; right: 90px; bottom: 90px; font-family:'Liberation Sans', Arial, sans-serif; font-size:16px; letter-spacing:2px; color:#C9A961; text-transform:uppercase; }
     """
     inner = f"""
 <div class="bracket"></div>
@@ -219,8 +206,8 @@ def slide_news(item, idx, total):
     .news-wrap {{ position: absolute; left: 90px; top: 300px; width: 860px; }}
     .headline {{ font-family: 'Playfair Display', serif; font-weight: 600; font-size: {size}px; line-height: 1.12; color: #FFFFFF; }}
     .hairline-wrap {{ margin: 30px 0; }}
-    .summary {{ font-family: 'Inter', sans-serif; font-size: 25px; line-height: 1.55; color: #C7D2E0; font-weight: 400; max-width: 820px; }}
-    .source {{ position: absolute; left: 90px; bottom: 130px; font-family:'Inter',sans-serif; font-size: 16px; letter-spacing: 2px; color:#C9A961; text-transform:uppercase; }}
+    .summary {{ font-family: 'Liberation Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 25px; line-height: 1.55; color: #C7D2E0; font-weight: 400; max-width: 820px; }}
+    .source {{ position: absolute; left: 90px; bottom: 130px; font-family:'Liberation Sans', Arial, sans-serif; font-size: 16px; letter-spacing: 2px; color:#C9A961; text-transform:uppercase; }}
     """
     inner = f"""
 <div class="bracket"></div>
@@ -250,12 +237,12 @@ def slide_cta(recap):
     .cta-title { position: absolute; left: 90px; top: 210px; font-family:'Playfair Display',serif; font-weight:600; font-size: 62px; color:#FFFFFF; width: 780px; line-height:1.08; }
     .recap-list { position: absolute; left: 90px; top: 380px; width: 860px; display: flex; flex-direction: column; gap: 26px; }
     .recap-item { display: flex; gap: 22px; align-items: flex-start; }
-    .recap-num { font-family:'Inter',sans-serif; font-size: 16px; color:#C9A961; font-weight:700; letter-spacing:1px; padding-top: 4px; }
-    .recap-text { font-family:'Inter',sans-serif; font-size: 22px; color:#C7D2E0; line-height:1.4; max-width: 760px; }
+    .recap-num { font-family:'Liberation Sans', Arial, sans-serif; font-size: 16px; color:#C9A961; font-weight:700; letter-spacing:1px; padding-top: 4px; }
+    .recap-text { font-family:'Liberation Sans', Arial, sans-serif; font-size: 22px; color:#C7D2E0; line-height:1.4; max-width: 760px; }
     .cta-box { position: absolute; left: 90px; bottom: 210px; }
     .cta-box .handle { font-family:'Playfair Display',serif; font-style:italic; font-size: 42px; color:#FFFFFF; }
     .cta-box .handle b { color:#C9A961; font-style: normal; }
-    .cta-box .sub { margin-top:12px; font-family:'Inter',sans-serif; font-size:19px; color:#9FB0C3; letter-spacing:0.5px; }
+    .cta-box .sub { margin-top:12px; font-family:'Liberation Sans', Arial, sans-serif; font-size:19px; color:#9FB0C3; letter-spacing:0.5px; }
     """
     inner = f"""
 <div class="bracket"></div>
